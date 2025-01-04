@@ -3,23 +3,38 @@ import pool from '../config/db';
 
 // Add Task
 export const addTask = async (req: Request, res: Response): Promise<void> => {
-  const { projectId, taskName, assignedTo, dueDate, status } = req.body;
-  try {
-    const result = await pool.query(
-      `INSERT INTO tasks (project_id, name, assigned_to, due_date, status) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-      [projectId, taskName, assignedTo, dueDate, status || 'Pending']
-    );
-    res.status(201).json({
-      message: 'Task created successfully.',
-      taskId: result.rows[0].id,
-    });
-  } catch (error) {
-    console.error('Error adding task:', error);
-    res.status(500).json({ error: 'Database error while adding task.' });
-  }
-};
-
+    const { projectId, taskName, assignedTo, dueDate, status } = req.body;
+    try {
+      // Validate projectId
+      const projectResult = await pool.query(`SELECT id FROM projects WHERE id = $1`, [projectId]);
+      if (projectResult.rows.length === 0) {
+        res.status(400).json({ error: `Project with ID ${projectId} does not exist.` });
+        return;
+      }
+  
+      // Validate assignedTo
+      const userResult = await pool.query(`SELECT id FROM users WHERE id = $1`, [assignedTo]);
+      if (userResult.rows.length === 0) {
+        res.status(400).json({ error: `User with ID ${assignedTo} does not exist.` });
+        return;
+      }
+  
+      // Insert task
+      const result = await pool.query(
+        `INSERT INTO tasks (project_id, name, assigned_to, due_date, status) 
+         VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+        [projectId, taskName, assignedTo, dueDate, status || 'Pending']
+      );
+      res.status(201).json({
+        message: 'Task created successfully.',
+        taskId: result.rows[0].id,
+      });
+    } catch (error) {
+      console.error('Error adding task:', error);
+      res.status(500).json({ error: 'Database error while adding task.' });
+    }
+  };
+  
 // Get Tasks by Project
 export const getTasksByProject = async (req: Request, res: Response): Promise<void> => {
   const { projectId } = req.params;
