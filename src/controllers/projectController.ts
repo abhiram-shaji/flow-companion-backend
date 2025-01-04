@@ -34,7 +34,7 @@ export const getAllProjects = async (_req: Request, res: Response) => {
 };
 
 // Get Project Details
-export const getProjectDetails = async (req: Request, res: Response) => {
+export const getProjectDetails = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     const result = await pool.query(
@@ -42,9 +42,12 @@ export const getProjectDetails = async (req: Request, res: Response) => {
        FROM projects WHERE id = $1`,
       [id]
     );
+
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Project not found.' });
+      res.status(404).json({ error: 'Project not found.' });
+      return;
     }
+
     res.status(200).json(result.rows[0]);
   } catch (error) {
     console.error('Error fetching project details:', error);
