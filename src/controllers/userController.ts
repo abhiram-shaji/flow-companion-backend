@@ -20,6 +20,37 @@ export const addWorker = async (req: Request, res: Response) => {
   }
 };
 
+// User Login
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+  const { email, password } = req.body;
+  try {
+    // Check if user exists
+    const userResult = await pool.query(
+      `SELECT id, password FROM users WHERE email = $1`,
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    const { id, password: storedPassword } = userResult.rows[0];
+
+    // Compare plain-text password
+    if (password !== storedPassword) {
+      res.status(401).json({ error: 'Invalid password.' });
+      return;
+    }
+
+    // Return user ID
+    res.status(200).json({ message: 'Login successful.', userId: id });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Database error during login.' });
+  }
+};
+
 // Get All Workers
 export const getAllWorkers = async (_req: Request, res: Response) => {
   try {
