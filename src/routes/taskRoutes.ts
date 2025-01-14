@@ -1,9 +1,11 @@
 import express from 'express';
-import { addTask, getTasksByProject, editTask, deleteTask } from '../controllers/taskController';
+import { addTask, getTasksByProject, editTask, deleteTask, getTasksByAssignedTo, getAllTasks } from '../controllers/taskController';
 
 const router = express.Router();
 
 router.post('/', addTask); // Add Task
+router.post('/api/tasks/assigned-to', getTasksByAssignedTo);
+router.get('/api/tasks', getAllTasks);
 router.get('/project/:projectId', getTasksByProject); // Get Tasks by Project
 router.put('/:id', editTask); // Edit Task
 router.delete('/:id', deleteTask); // Delete Task

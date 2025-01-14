@@ -51,6 +51,51 @@ export const getTasksByProject = async (req: Request, res: Response): Promise<vo
   }
 };
 
+// Get Tasks by Assigned User
+export const getTasksByAssignedTo = async (req: Request, res: Response): Promise<void> => {
+  const { assignedTo } = req.body; // assuming the value is passed in the request body
+
+  try {
+      // Validate that assignedTo is provided
+      if (!assignedTo) {
+          res.status(400).json({ error: 'Missing required parameter: assignedTo' });
+          return;
+      }
+
+      // Query the database for tasks assigned to the specified user
+      const result = await pool.query(
+          `SELECT id AS "taskId", project_id AS "projectId", name AS "taskName", 
+                  assigned_to AS "assignedTo", due_date AS "dueDate", status 
+           FROM tasks WHERE assigned_to = $1`,
+          [assignedTo]
+      );
+
+      // Return the tasks
+      res.status(200).json(result.rows);
+  } catch (error) {
+      console.error('Error fetching tasks by assigned user:', error);
+      res.status(500).json({ error: 'Database error while fetching tasks.' });
+  }
+};
+
+// Get All Tasks
+export const getAllTasks = async (req: Request, res: Response): Promise<void> => {
+  try {
+      // Query the database to get all tasks
+      const result = await pool.query(
+          `SELECT id AS "taskId", project_id AS "projectId", name AS "taskName", 
+                  assigned_to AS "assignedTo", due_date AS "dueDate", status 
+           FROM tasks`
+      );
+
+      // Return the tasks
+      res.status(200).json(result.rows);
+  } catch (error) {
+      console.error('Error fetching all tasks:', error);
+      res.status(500).json({ error: 'Database error while fetching tasks.' });
+  }
+}
+
 // Edit Task
 export const editTask = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
