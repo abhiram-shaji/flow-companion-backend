@@ -33,6 +33,40 @@ export const getAllProjects = async (_req: Request, res: Response) => {
   }
 };
 
+// Get Projects by Assigned User
+export const getProjectsByAssignedUser = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = req.body; // assuming the value is passed in the request body
+
+  try {
+      // Validate that userId is provided
+      if (!userId) {
+          res.status(400).json({ error: 'Missing required parameter: userId' });
+          return;
+      }
+
+      // Query the database for projects assigned to the specified user
+      const result = await pool.query(
+          `SELECT id AS "projectId", name, budget, current_spend AS "currentSpend", 
+                  start_date AS "startDate", end_date AS "endDate" 
+           FROM projects 
+           WHERE assigned_to = $1`,
+          [userId]
+      );
+
+      if (result.rows.length === 0) {
+          res.status(404).json({ error: `No projects found for user ID ${userId}.` });
+          return;
+      }
+
+      // Return the assigned projects
+      res.status(200).json(result.rows);
+  } catch (error) {
+      console.error('Error fetching projects for user:', error);
+      res.status(500).json({ error: 'Database error while fetching projects.' });
+  }
+};
+
+
 // Get Project Details
 export const getProjectDetails = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
