@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 router.post('/', addProject); // Add Project
-router.get('/', getAllProjects); // Get All Projects
+router.get('/get-all', getAllProjects); // Get All Projects
 router.get('/:id', getProjectDetails); // Get Project Details
 router.put('/:id', editProject); // Edit Project
 router.delete('/:id', deleteProject); // Delete Project
