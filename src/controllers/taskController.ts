@@ -53,11 +53,11 @@ export const getTasksByProject = async (req: Request, res: Response): Promise<vo
 
 // Get Tasks by Assigned User
 export const getTasksByAssignedTo = async (req: Request, res: Response): Promise<void> => {
-  const { assignedTo } = req.body; // assuming the value is passed in the request body
+  const { userId } = req.body; // assuming the value is passed in the request body
 
   try {
       // Validate that assignedTo is provided
-      if (!assignedTo) {
+      if (!userId) {
           res.status(400).json({ error: 'Missing required parameter: assignedTo' });
           return;
       }
@@ -67,7 +67,7 @@ export const getTasksByAssignedTo = async (req: Request, res: Response): Promise
           `SELECT id AS "taskId", project_id AS "projectId", name AS "taskName", 
                   assigned_to AS "assignedTo", due_date AS "dueDate", status 
            FROM tasks WHERE assigned_to = $1`,
-          [assignedTo]
+          [userId]
       );
 
       // Return the tasks
